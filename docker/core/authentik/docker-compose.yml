@@ -1,0 +1,93 @@
+x-authentik-env: &authentik-env
+  AUTHENTIK_POSTGRESQL__HOST: postgresql
+  AUTHENTIK_POSTGRESQL__NAME: authentik_db
+  AUTHENTIK_POSTGRESQL__USER: authentik_user
+  AUTHENTIK_ERROR_REPORTING__ENABLED: ${AUTHENTIK_ERROR_REPORTING__ENABLED}
+  AUTHENTIK_EMAIL__HOST: ${AUTHENTIK_EMAIL__HOST}
+  AUTHENTIK_EMAIL__PORT: ${AUTHENTIK_EMAIL__PORT}
+  AUTHENTIK_EMAIL__USERNAME: ${AUTHENTIK_EMAIL__USERNAME}
+  AUTHENTIK_EMAIL__PASSWORD: ${AUTHENTIK_EMAIL__PASSWORD}
+  AUTHENTIK_EMAIL__USE_TLS: ${AUTHENTIK_EMAIL__USE_TLS}
+  AUTHENTIK_EMAIL__USE_SSL: ${AUTHENTIK_EMAIL__USE_SSL}
+  AUTHENTIK_EMAIL__TIMEOUT: ${AUTHENTIK_EMAIL__TIMEOUT}
+  AUTHENTIK_EMAIL__FROM: ${AUTHENTIK_EMAIL__FROM}
+  AUTHENTIK_HOST: https://auth.${DOMAIN_NAME}
+  AUTHENTIK_BOOTSTRAP_EMAIL: ${AUTHENTIK_BOOTSTRAP_EMAIL}
+  AUTHENTIK_BOOTSTRAP_PASSWORD: ${AUTHENTIK_BOOTSTRAP_PASSWORD}
+
+services:
+  authentik-server:
+    command: server
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      <<: *authentik-env
+    image: ghcr.io/goauthentik/server:2025.12.4
+    container_name: authentik-server
+    restart: unless-stopped
+    env_file:
+      - ./.env.authentik
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.authentik.rule=Host(`auth.${DOMAIN_NAME}`)
+      - traefik.http.routers.authentik.entrypoints=websecure
+      - traefik.http.routers.authentik.tls=true
+      - traefik.http.routers.authentik.tls.certresolver=cloudflare
+      - traefik.http.routers.authentik.service=authentik
+      - traefik.http.services.authentik.loadbalancer.server.port=9000
+      - traefik.docker.network=proxy-authentik
+      - traefik.http.middlewares.authentik.forwardauth.address=http://authentik-server:9000/outpost.goauthentik.io/auth/traefik
+      - traefik.http.middlewares.authentik.forwardauth.trustForwardHeader=true
+      - traefik.http.middlewares.authentik.forwardauth.authResponseHeaders=X-authentik-username,X-authentik-groups,X-authentik-email,X-authentik-name,X-authentik-uid,X-authentik-jwt,X-authentik-meta-jwks,X-authentik-meta-outpost,X-authentik-meta-provider,X-authentik-meta-app,X-authentik-meta-version
+      - homepage.group=Infrastructure
+      - homepage.name=Authentik
+      - homepage.icon=authentik
+      - homepage.href=https://auth.${DOMAIN_NAME}
+    volumes:
+      - authentik-data:/data
+      - authentik-certs:/certs
+      - authentik-custom-templates:/templates
+    networks:
+      - proxy-authentik
+      - proxy-postgres
+
+  authentik-worker:
+    command: worker
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    environment:
+      <<: *authentik-env
+      DOMAIN_NAME: ${DOMAIN_NAME}
+    image: ghcr.io/goauthentik/server:2025.12.4
+    container_name: authentik-worker
+    restart: unless-stopped
+    env_file:
+      - ./.env.authentik
+    user: root
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - authentik-data:/data
+      - authentik-certs:/certs
+      - authentik-custom-templates:/templates
+      - ./blueprints:/blueprints/custom:ro
+    networks:
+      - proxy-postgres
+
+volumes:
+  authentik-data:
+    external: true
+    name: authentik_data
+  authentik-certs:
+    external: true
+    name: authentik_certs
+  authentik-custom-templates:
+    external: true
+    name: authentik_custom_templates
+
+networks:
+  proxy-authentik:
+    external: true
+  proxy-postgres:
+    external: true

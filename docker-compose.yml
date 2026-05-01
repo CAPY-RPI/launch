@@ -1,0 +1,11 @@
+name: capy-lab
+
+include:
+  - path: docker/core/postgresql/docker-compose.yml
+  - path: docker/core/authentik/docker-compose.yml
+  - path: docker/core/cloudflared/docker-compose.yml
+  - path: docker/core/traefik/docker-compose.yml
+  - path: docker/system/gatus/docker-compose.yml
+  - path: docker/system/homepage/docker-compose.yml
+  - path: docker/system/whoami/docker-compose.yml
+  - path: docker/capy/docker-compose.yml

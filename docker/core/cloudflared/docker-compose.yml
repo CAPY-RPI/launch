@@ -1,0 +1,18 @@
+# homelab/core/cloudflared/docker-compose.yml
+services:
+  cloudflared:
+    image: cloudflare/cloudflared
+    container_name: cloudflared
+    restart: unless-stopped
+    command: tunnel --no-autoupdate run
+    env_file:
+      - ./.env.cloudflared
+    networks:
+      - public
+      - proxy-cloudflare
+
+networks:
+  public:
+    external: true
+  proxy-cloudflare:
+    external: true

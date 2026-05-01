@@ -1,0 +1,114 @@
+# Gatus Configuration - Generated
+storage:
+  type: sqlite
+  path: /data/data.db
+
+ui:
+  title: "Service Status"
+  header: "Uptime Monitor"
+
+endpoints:
+  - name: gatus-internal
+    group: "Core Infrastructure"
+    url: "http://localhost:8080/health"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Authentik (auth.jasonz.dev)"
+    group: "Public"
+    url: "https://auth.jasonz.dev"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Capy API (api.jasonz.dev)"
+    group: "Public"
+    url: "https://api.jasonz.dev"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Capy Lander (jasonz.dev)"
+    group: "Public"
+    url: "https://jasonz.dev"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Gatus (status.jasonz.dev)"
+    group: "Public"
+    url: "https://status.jasonz.dev"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Homepage (home.jasonz.dev)"
+    group: "Public"
+    url: "https://home.jasonz.dev"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Traefik (traefik.jasonz.dev)"
+    group: "Public"
+    url: "https://traefik.jasonz.dev/ping"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Whoami (whoami.jasonz.dev)"
+    group: "Public"
+    url: "https://whoami.jasonz.dev"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Authentik (authentik-server)"
+    group: "Internal"
+    url: "http://authentik-server:9000"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Capy API (capy-api)"
+    group: "Internal"
+    url: "http://capy-api:8080"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Capy Lander (capy-lander)"
+    group: "Internal"
+    url: "http://capy-lander:80"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Gatus (gatus)"
+    group: "Internal"
+    url: "http://gatus:8080"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Homepage (homepage)"
+    group: "Internal"
+    url: "http://homepage:3000"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Traefik (traefik)"
+    group: "Internal"
+    url: "http://traefik:8080/ping"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"
+
+  - name: "Whoami (traefik-whoami)"
+    group: "Internal"
+    url: "http://traefik-whoami:80"
+    interval: 1m
+    conditions:
+      - "[STATUS] == 200"

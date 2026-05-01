@@ -1,0 +1,11 @@
+---
+# For configuration options and examples, please see:
+# https://gethomepage.dev/configs/settings/
+
+layout:
+  Apps:
+    style: row
+    columns: 3
+  Infrastructure:
+    style: row
+    columns: 3

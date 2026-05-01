@@ -1,0 +1,60 @@
+services:
+  capy-api:
+    image: ghcr.io/capy-rpi/api:main
+    platform: linux/amd64
+    container_name: capy-api
+    restart: unless-stopped
+    env_file:
+      - ./.env.capy
+    environment:
+      SERVER_HOST: ${CAPY_SERVER_HOST}
+      SERVER_PORT: ${CAPY_SERVER_PORT}
+      JWT_EXPIRY_HOURS: ${CAPY_JWT_EXPIRY_HOURS}
+      COOKIE_SECURE: ${CAPY_COOKIE_SECURE}
+      COOKIE_DOMAIN: ${DOMAIN_NAME}
+      ENV: ${CAPY_ENV}
+      GOOGLE_CLIENT_ID: ${CAPY_GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${CAPY_GOOGLE_CLIENT_SECRET}
+      GOOGLE_REDIRECT_URL: ${CAPY_GOOGLE_REDIRECT_URL}
+    depends_on:
+      postgresql:
+        condition: service_healthy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.capy-api.rule=Host(`${DOMAIN_NAME}`) && PathPrefix(`/api`)
+      - traefik.http.routers.capy-api.entrypoints=websecure
+      - traefik.http.routers.capy-api.tls=true
+      - traefik.http.routers.capy-api.tls.certresolver=cloudflare
+      - traefik.docker.network=proxy-capy
+      - traefik.http.services.capy-api.loadbalancer.server.port=8080
+      - homepage.group=Capy
+      - homepage.name=Capy API
+      - homepage.href=https://${DOMAIN_NAME}/api
+    networks:
+      - proxy-capy
+      - proxy-postgres
+
+  capy-lander:
+    image: ghcr.io/capy-rpi/lander:main
+    platform: linux/amd64
+    container_name: capy-lander
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.capy-lander.rule=Host(`${DOMAIN_NAME}`)
+      - traefik.http.routers.capy-lander.entrypoints=websecure
+      - traefik.http.routers.capy-lander.tls=true
+      - traefik.http.routers.capy-lander.tls.certresolver=cloudflare
+      - traefik.docker.network=proxy-capy
+      - traefik.http.services.capy-lander.loadbalancer.server.port=80
+      - homepage.group=Capy
+      - homepage.name=Capy Lander
+      - homepage.href=https://${DOMAIN_NAME}
+    networks:
+      - proxy-capy
+
+networks:
+  proxy-capy:
+    external: true
+  proxy-postgres:
+    external: true

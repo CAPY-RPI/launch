@@ -1,0 +1,54 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+log:
+  level: INFO
+
+api:
+  dashboard: true
+  insecure: false
+
+entryPoints:
+  web:
+    address: :80
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: :443
+  traefik:
+    address: :8080
+
+ping:
+  entryPoint: traefik
+
+providers:
+  docker:
+    exposedByDefault: false
+    
+  file:
+    directory: /etc/traefik/conf/
+    watch: true
+
+# allow self signed certs
+serversTransport:
+  insecureSkipVerify: true
+
+certificatesResolvers:
+  cloudflare:
+    acme:
+      email: traefik.automations@jasonzhang.org
+      storage: /var/traefik/certs/cloudflare-acme.json
+      caServer: https://acme-v02.api.letsencrypt.org/directory
+      # caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      keyType: EC256
+      dnsChallenge:
+        provider: cloudflare
+        # disable the internal check that is currently timing out
+        propagation:
+          disableChecks: true
+          # add a manual delay to give Cloudflare time to update (60-120s)
+          delayBeforeChecks: 90
