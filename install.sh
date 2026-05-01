@@ -17,7 +17,7 @@ export DEBIAN_FRONTEND=noninteractive
 # --- System update + baseline tooling ----------------------------------------
 $SUDO apt-get update
 $SUDO apt-get -y upgrade
-$SUDO apt-get install -y git make
+$SUDO apt-get install -y git make gpg
 
 # --- Clone the repo if we're not already in it -------------------------------
 # If we're already inside the checked-out repo, use that. Otherwise clone.
